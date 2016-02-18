@@ -8,11 +8,11 @@ import (
 	"os"
 	"os/exec"
 	"os/user"
-	"runtime"
 	"strconv"
 	"time"
 
 	"github.com/hashicorp/go-msgpack/codec"
+	"github.com/mattn/go-shellwords"
 )
 
 const (
@@ -39,18 +39,8 @@ func aeScale(interval time.Duration, n int) time.Duration {
 
 // ExecScript returns a command to execute a script
 func ExecScript(script string) (*exec.Cmd, error) {
-	var shell, flag string
-	if runtime.GOOS == "windows" {
-		shell = "cmd"
-		flag = "/C"
-	} else {
-		shell = "/bin/sh"
-		flag = "-c"
-	}
-	if other := os.Getenv("SHELL"); other != "" {
-		shell = other
-	}
-	cmd := exec.Command(shell, flag, script)
+	args, _ := shellwords.Parse(script)
+	cmd := exec.Command(args[0], args[1:]...)
 	return cmd, nil
 }
 
